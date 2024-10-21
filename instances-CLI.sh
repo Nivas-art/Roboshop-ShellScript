@@ -13,11 +13,11 @@ else
 fi
     echo "creatiing insatnces $name:$instance_type"
     insatnce_id=$(aws ec2 run-instances --image-id ami-09c813fb71547fc4f --instance-type $instance_type --security-group-ids sg-0ecfbd8f3efc72ed0 --subnet-id subnet-0bf7e058ff1f78d08  --query 'Instances[0].InstanceId' --output text)
-    echo "Instance created for: $instance_name"
+    echo "Instance created for: $name"
 
-    aws ec2 create-tags --resources $instance_id --tags Key=Name,Value=$instance_name
+    aws ec2 create-tags --resources $instance_id --tags Key=Name,Value=$name
 
-    if [ $instance_name == "web" ]
+    if [ $name == "web" ]
     then
         aws ec2 wait instance-running --instance-ids $instance_id
         public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[0].Instances[0].[PublicIpAddress]' --output text)
@@ -27,10 +27,10 @@ fi
         ip_to_use=$private_ip
     fi
 
-    echo "creating R53 record for $instance_name"
+    echo "creating R53 record for $name"
     aws route53 change-resource-record-sets --hosted-zone-id $hosted_zone_id --change-batch '
     {
-        "Comment": "Creating a record set for '$instance_name'"
+        "Comment": "Creating a record set for '$name'"
         ,"Changes": [{
         "Action"              : "UPSERT"
         ,"ResourceRecordSet"  : {
